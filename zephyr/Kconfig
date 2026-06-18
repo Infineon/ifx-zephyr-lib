@@ -1,0 +1,32 @@
+config AVC
+	bool "Infineon Audio Voice Core (AVC)"
+	help
+	  Enable Infineon Audio Voice Core integration.
+
+if AVC
+
+config AVC_SPEECH_ENH
+	bool "Enable speech enhancement API support"
+	default y
+	help
+	  Enables speech enhancement interfaces used by AFE and voice processing paths.
+
+choice AVC_TARGET_CORE
+	prompt "Voice Core target core"
+	default AVC_TARGET_CM33
+
+config AVC_TARGET_CM33
+	bool "CM33"
+
+config AVC_TARGET_CM55
+	bool "CM55"
+
+endchoice
+
+config AVC_SOURCE_DIR
+	string "Path to checked-out audio-voice-core asset"
+	default "${ZEPHYR_BASE}/../modules/lib/third_party/audio-voice-core"
+	help
+	  Filesystem path to the upstream audio-voice-core repository pulled by west.
+
+endif # AVC
