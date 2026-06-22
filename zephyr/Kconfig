@@ -1,0 +1,44 @@
+# Copyright (c) 2026 Infineon Technologies AG,
+# or an affiliate of Infineon Technologies AG.
+# SPDX-License-Identifier: Apache-2.0
+
+config MWUTILS
+	bool "Enable Middleware Utilities library support"
+	default n
+	help
+	  Enable Middleware Utilities library providing logging,
+	  string utilities, JSON parsing, and other common utilities.
+
+if MWUTILS
+
+config MWUTILS_LOG
+	bool "Enable cy_log logging support"
+	default y
+	help
+	  Enable cy_log module for application logging.
+
+config MWUTILS_JSON
+	bool "Enable JSON parser"
+	default n
+	help
+	  Enable JSON parsing utilities.
+
+config MWUTILS_STRING
+	bool "Enable string utilities"
+	default y
+	help
+	  Enable cy_string utilities for string manipulation.
+
+config MWUTILS_LINKED_LIST
+	bool "Enable linked list utilities"
+	default n
+	help
+	  Enable linked list data structure utilities.
+
+config MWUTILS_NETWORK
+	bool "Enable network utilities"
+	default n
+	help
+	  Enable network-related utilities.
+
+endif # MWUTILS
