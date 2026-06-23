@@ -4,19 +4,31 @@
 
 if(CONFIG_MWUTILS)
 
+  # Module layout may either expose the asset at module root or nested under
+  # an extra repository directory (e.g. ifx-connectivity-utilities/connectivity-utilities).
+  set(MWUTILS_ASSET_DIR "${ZEPHYR_CURRENT_MODULE_DIR}")
+  if(EXISTS "${ZEPHYR_CURRENT_MODULE_DIR}/connectivity-utilities")
+    set(MWUTILS_ASSET_DIR "${ZEPHYR_CURRENT_MODULE_DIR}/connectivity-utilities")
+  endif()
+
   # Add include paths
   zephyr_include_directories(
-    ${ZEPHYR_CURRENT_MODULE_DIR}
-    ${ZEPHYR_CURRENT_MODULE_DIR}/cy_log
-    ${ZEPHYR_CURRENT_MODULE_DIR}/cy_string
-    ${ZEPHYR_CURRENT_MODULE_DIR}/JSON_parser
-    ${ZEPHYR_CURRENT_MODULE_DIR}/linked_list
-    ${ZEPHYR_CURRENT_MODULE_DIR}/network
+    ${MWUTILS_ASSET_DIR}
+    ${MWUTILS_ASSET_DIR}/cy_log
+    ${MWUTILS_ASSET_DIR}/cy_string
+    ${MWUTILS_ASSET_DIR}/JSON_parser
+    ${MWUTILS_ASSET_DIR}/linked_list
+    ${MWUTILS_ASSET_DIR}/network
     ${ZEPHYR_CURRENT_MODULE_DIR}/zephyr/include
   )
-  
+
   # Include standard Infineon core-lib for cy_result.h
-  zephyr_include_directories(${CMAKE_SOURCE_DIR}/modules/hal/infineon/core-lib/include)
+  set(CORELIB_INCLUDE_DIR "${ZEPHYR_CURRENT_MODULE_DIR}/../../hal/infineon/core-lib/include")
+  if(EXISTS "${CORELIB_INCLUDE_DIR}")
+    zephyr_include_directories(${CORELIB_INCLUDE_DIR})
+  else()
+    message(WARNING "MWUTILS: core-lib include not found at ${CORELIB_INCLUDE_DIR}")
+  endif()
 
   # Core middleware utilities
   set(MWUTILS_SOURCES)
@@ -24,14 +36,14 @@ if(CONFIG_MWUTILS)
   # cy_log support
   if(CONFIG_MWUTILS_LOG)
     list(APPEND MWUTILS_SOURCES
-      ${ZEPHYR_CURRENT_MODULE_DIR}/cy_log/cy_log.c
+      ${MWUTILS_ASSET_DIR}/cy_log/cy_log.c
     )
   endif()
 
   # String utilities
   if(CONFIG_MWUTILS_STRING)
     # Add cy_string sources if they exist
-    file(GLOB CY_STRING_SOURCES "${ZEPHYR_CURRENT_MODULE_DIR}/cy_string/*.c")
+    file(GLOB CY_STRING_SOURCES "${MWUTILS_ASSET_DIR}/cy_string/*.c")
     if(CY_STRING_SOURCES)
       list(APPEND MWUTILS_SOURCES ${CY_STRING_SOURCES})
     endif()
@@ -39,7 +51,7 @@ if(CONFIG_MWUTILS)
 
   # JSON parser
   if(CONFIG_MWUTILS_JSON)
-    file(GLOB JSON_SOURCES "${ZEPHYR_CURRENT_MODULE_DIR}/JSON_parser/*.c")
+    file(GLOB JSON_SOURCES "${MWUTILS_ASSET_DIR}/JSON_parser/*.c")
     if(JSON_SOURCES)
       list(APPEND MWUTILS_SOURCES ${JSON_SOURCES})
     endif()
@@ -47,7 +59,7 @@ if(CONFIG_MWUTILS)
 
   # Linked list utilities
   if(CONFIG_MWUTILS_LINKED_LIST)
-    file(GLOB LINKED_LIST_SOURCES "${ZEPHYR_CURRENT_MODULE_DIR}/linked_list/*.c")
+    file(GLOB LINKED_LIST_SOURCES "${MWUTILS_ASSET_DIR}/linked_list/*.c")
     if(LINKED_LIST_SOURCES)
       list(APPEND MWUTILS_SOURCES ${LINKED_LIST_SOURCES})
     endif()
@@ -55,7 +67,7 @@ if(CONFIG_MWUTILS)
 
   # Network utilities
   if(CONFIG_MWUTILS_NETWORK)
-    file(GLOB NETWORK_SOURCES "${ZEPHYR_CURRENT_MODULE_DIR}/network/*.c")
+    file(GLOB NETWORK_SOURCES "${MWUTILS_ASSET_DIR}/network/*.c")
     if(NETWORK_SOURCES)
       list(APPEND MWUTILS_SOURCES ${NETWORK_SOURCES})
     endif()
@@ -65,7 +77,7 @@ if(CONFIG_MWUTILS)
   if(MWUTILS_SOURCES)
     zephyr_library()
     zephyr_library_sources(${MWUTILS_SOURCES})
-    
+
     # Add any necessary compile definitions
     zephyr_library_compile_definitions(
       CY_MW_UTILITIES_SUPPORT=1
