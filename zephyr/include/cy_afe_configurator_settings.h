@@ -20,8 +20,6 @@ extern "C" {
 #ifndef CY_AFE_ENABLE_TUNING_FEATURE
 #ifdef CONFIG_AUDIOFE_TUNING
 #define CY_AFE_ENABLE_TUNING_FEATURE (1u)
-#else
-#define CY_AFE_ENABLE_TUNING_FEATURE (0u)
 #endif
 #endif
 

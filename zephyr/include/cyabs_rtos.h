@@ -54,7 +54,15 @@ static inline cy_rslt_t cy_rtos_get_mutex(cy_mutex_t* mutex, uint32_t timeout_ms
     k_timeout_t timeout = (timeout_ms == CY_RTOS_NEVER_TIMEOUT) ? K_FOREVER : K_MSEC(timeout_ms);
     return k_mutex_lock(mutex, timeout) == 0 ? CY_RTOS_SUCCESS : CY_RTOS_GENERAL_ERROR;
 }
+static inline cy_rslt_t cy_rtos_mutex_get(cy_mutex_t* mutex, uint32_t timeout_ms)
+{
+    return cy_rtos_get_mutex(mutex, timeout_ms);
+}
 static inline cy_rslt_t cy_rtos_set_mutex(cy_mutex_t* mutex) { return k_mutex_unlock(mutex) == 0 ? CY_RTOS_SUCCESS : CY_RTOS_GENERAL_ERROR; }
+static inline cy_rslt_t cy_rtos_mutex_set(cy_mutex_t* mutex)
+{
+    return cy_rtos_set_mutex(mutex);
+}
 static inline cy_rslt_t cy_rtos_deinit_mutex(cy_mutex_t* mutex) { (void)mutex; return CY_RTOS_SUCCESS; }
 
 static inline cy_rslt_t cy_rtos_init_queue(cy_queue_t* queue, size_t length, size_t item_size) { (void)queue; (void)length; (void)item_size; return CY_RTOS_SUCCESS; }
@@ -62,6 +70,8 @@ static inline cy_rslt_t cy_rtos_put_queue(cy_queue_t* queue, const void* item_pt
 { (void)queue; (void)item_ptr; (void)timeout_ms; (void)in_isr; return CY_RTOS_SUCCESS; }
 static inline cy_rslt_t cy_rtos_get_queue(cy_queue_t* queue, void* item_ptr, uint32_t timeout_ms, bool in_isr)
 { (void)queue; (void)item_ptr; (void)timeout_ms; (void)in_isr; return CY_RTOS_SUCCESS; }
+static inline cy_rslt_t cy_rtos_queue_count(cy_queue_t* queue, uint32_t* count)
+{ (void)queue; if (count) *count = 0; return CY_RTOS_SUCCESS; }
 static inline cy_rslt_t cy_rtos_deinit_queue(cy_queue_t* queue) { (void)queue; return CY_RTOS_SUCCESS; }
 
 static inline cy_rslt_t cy_rtos_init_semaphore(cy_semaphore_t** semaphore, uint32_t max_count, uint32_t initial_count)
