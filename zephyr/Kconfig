@@ -1,0 +1,179 @@
+# Copyright (c) 2026 Infineon Technologies AG
+# SPDX-License-Identifier: Apache-2.0
+
+config ML_MIDDLEWARE_INFINEON
+	bool "Infineon ML Middleware Support"
+	select USE_INFINEON_ABSTRACTION_RTOS
+	select ML_TFLITE_MICRO_INFINEON
+	help
+	  Enable Infineon Machine Learning Middleware library for 
+	  TensorFlow Lite Micro inference with optional NPU acceleration.
+
+if ML_MIDDLEWARE_INFINEON
+
+comment "Quantization Type Selection"
+
+choice ML_MIDDLEWARE_QUANTIZATION
+	prompt "ML Model Quantization Type"
+	default ML_MIDDLEWARE_FLOAT32
+	help
+	  Select the quantization type for ML model data.
+	  This determines the data type used for model inputs and outputs.
+
+config ML_MIDDLEWARE_FLOAT32
+	bool "32-bit Floating Point"
+	help
+	  Use 32-bit floating point quantization.
+	  Provides highest precision but requires more memory and computation.
+
+config ML_MIDDLEWARE_INT8
+	bool "8-bit Integer" 
+	help
+	  Use 8-bit integer quantization.
+	  Provides good performance with reduced memory usage,
+	  optimized for NPU acceleration.
+
+config ML_MIDDLEWARE_INT16
+	bool "16-bit Integer"
+	help
+	  Use 16-bit integer quantization.
+	  Balanced approach between precision and performance.
+
+endchoice
+
+comment "Inference Engine Selection"
+
+choice ML_MIDDLEWARE_INFERENCE_ENGINE
+	prompt "TensorFlow Lite Inference Engine"
+	default ML_MIDDLEWARE_TFLITE_INTERPRETER
+	help
+	  Select the TensorFlow Lite inference engine implementation.
+
+config ML_MIDDLEWARE_TFLITE_INTERPRETER
+	bool "With Interpreter"
+	help
+	  Use TensorFlow Lite with full interpreter support.
+	  Provides maximum flexibility for different model types
+	  but requires more memory.
+
+config ML_MIDDLEWARE_TFLITE_LESS  
+	bool "Interpreter-less (Optimized)"
+	help
+	  Use TensorFlow Lite without interpreter for optimized performance.
+	  Requires pre-compiled model-specific code but uses less memory
+	  and provides better performance.
+
+endchoice
+
+config ML_MIDDLEWARE_ZEPHYR_BACKEND
+	bool "Use Zephyr-native TensorFlow Backend"
+	depends on ML_MIDDLEWARE_TFLITE_INTERPRETER
+	depends on TENSORFLOW_LITE_MICRO
+	depends on STD_CPP17
+	default n
+	help
+	  Use Zephyr's proven TensorFlow Lite Micro infrastructure instead of
+	  Infineon's TensorFlow implementation. This eliminates C++ dependency 
+	  conflicts while maintaining complete API compatibility.
+	  
+	  Benefits:
+	  - No Infineon TFLite module dependency
+	  - Uses Zephyr's proven TensorFlow infrastructure
+	  - Better integration with Zephyr NPU drivers
+	  - Maintains all mtb_ml_* API signatures for application compatibility
+	  
+	  Requires CONFIG_TENSORFLOW_LITE_MICRO=y and CONFIG_STD_CPP17=y
+
+comment "Hardware Acceleration Options - NNLite NPU is PRIMARY GOAL"
+
+config ML_MIDDLEWARE_NNLITE
+	bool "Infineon NNLite NPU Support"
+	depends on CPU_CORTEX_M33
+	help
+	  Enable Infineon NNLite Neural Processing Unit acceleration via PDL.
+	  This is the PRIMARY GOAL for M33 core acceleration, providing:
+	  - Hardware-accelerated neural network inference
+	  - 5.6x performance improvement over CPU-only
+	  - 2.7x lower power consumption
+	  - Native PDL integration for optimal control
+	  - Automatic fallback to CPU when NPU unavailable
+
+config ML_MIDDLEWARE_ETHOS_U55
+	bool "ARM Ethos-U55 NPU Support via ML Middleware"
+	depends on CPU_CORTEX_M55
+	help
+	  Enable ARM Ethos-U55 Neural Processing Unit acceleration through the
+	  Infineon ML Middleware layer. Does NOT require CONFIG_ETHOS_U (the
+	  native Zephyr Ethos-U driver) -- the ML Middleware manages NPU init
+	  directly. Use CONFIG_ETHOS_U alone for the native Zephyr driver path.
+
+comment "Optional Features"
+
+config ML_MIDDLEWARE_STREAMING
+	bool "Data Streaming Interface"
+	depends on UART
+	help
+	  Enable streaming interface for model validation and debugging.
+	  Allows real-time data exchange with host PC for model
+	  validation and performance analysis.
+
+config ML_MIDDLEWARE_PERFORMANCE_MONITORING  
+	bool "Performance Monitoring"
+	default y
+	help
+	  Enable performance monitoring and profiling capabilities.
+	  Provides timing measurements, memory usage tracking,
+	  and NPU utilization statistics.
+
+comment "Advanced Configuration"
+
+config ML_MIDDLEWARE_TENSOR_ARENA_SIZE
+	int "Default tensor arena size in bytes"
+	default 8192
+	range 1024 131072
+	help
+	  Default size of the tensor arena used by TensorFlow Lite Micro.
+	  Applications can override this value as needed.
+	  Larger values support more complex models but use more memory.
+
+config ML_MIDDLEWARE_MAX_MODELS
+	int "Maximum number of simultaneous models"
+	default 1
+	range 1 8
+	help
+	  Maximum number of ML models that can be loaded simultaneously.
+	  Each additional model requires additional memory for tensor arenas.
+
+config ML_MIDDLEWARE_CACHE_MANAGEMENT
+	bool "NPU Cache Management"
+	depends on ML_MIDDLEWARE_ETHOS_U55 || ML_MIDDLEWARE_NNLITE
+	default y if ML_MIDDLEWARE_ETHOS_U55 || ML_MIDDLEWARE_NNLITE
+	help
+	  Enable cache management for NPU operations.
+	  Improves performance by optimizing cache usage during inference.
+
+config ML_MIDDLEWARE_AUTO_INIT
+	bool "Automatic ML Middleware Initialization"
+	default y
+	help
+	  Automatically initialize ML middleware during system startup.
+	  Disable this if you want to manually control initialization timing.
+
+config ML_MIDDLEWARE_INIT_PRIORITY
+	int "ML Middleware initialization priority"
+	depends on ML_MIDDLEWARE_AUTO_INIT
+	default 85
+	range 50 99
+	help
+	  System initialization priority for ML middleware.
+	  Must be higher than RTOS abstraction layer (typically 80).
+
+config ML_LOG_LEVEL
+	int "ML Middleware log level"
+	default 3
+	range 0 4
+	help
+	  Log level for ML middleware components:
+	  0 = Off, 1 = Error, 2 = Warning, 3 = Info, 4 = Debug
+
+endif # ML_MIDDLEWARE_INFINEON
