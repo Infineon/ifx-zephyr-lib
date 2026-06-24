@@ -1,0 +1,140 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2024 Infineon Technologies AG
+
+description: TensorFlow Lite Micro NPU Configuration
+
+compatible: "tflite,micro-npu"
+
+properties:
+  acceleration-type:
+    type: string
+    enum:
+      - "none"
+      - "ethos-u55"  
+      - "nnlite"
+      - "cmsis-nn"
+    default: "none"
+    description: |
+      Hardware acceleration type for TensorFlow Lite Micro inference.
+      - none: Software-only inference
+      - ethos-u55: ARM Ethos-U55 NPU acceleration  
+      - nnlite: Infineon NNLite NPU acceleration
+      - cmsis-nn: ARM CMSIS-NN optimization
+
+  model-cache-size:
+    type: int
+    default: 8192
+    description: |
+      Size of model cache in bytes for acceleration hardware.
+
+  arena-size:  
+    type: int
+    default: 8192
+    description: |
+      TensorFlow Lite Micro arena size in bytes.
+
+  quantization-support:
+    type: string-array
+    enum:
+      - "int8"
+      - "int16" 
+      - "float32"
+    default: ["float32"]
+    description: |
+      Supported quantization types for this accelerator.
+
+  memory-region:
+    type: phandle
+    description: |
+      Memory region for NPU operations and model storage.
+
+  cache-management:
+    type: string
+    enum:
+      - "none"
+      - "automatic"
+      - "conditional"
+    default: "automatic"
+    description: |
+      Cache management strategy for NPU operations.
+      - none: No cache management
+      - automatic: Hardware handles cache coherency
+      - conditional: Software manages cache based on data types
+
+  performance-monitoring:
+    type: boolean
+    description: |
+      Enable performance monitoring for NPU operations.
+
+  max-models:
+    type: int
+    default: 1
+    description: |
+      Maximum number of concurrent models supported.
+
+  interrupts:
+    description: |
+      Interrupt configuration for NPU completion signals.
+
+  interrupt-names:
+    description: |
+      Names for NPU interrupts (inference-complete, error, etc.).
+
+  power-domain:
+    type: phandle  
+    description: |
+      Power domain for NPU hardware.
+
+  clock-frequency:
+    type: int
+    description: |
+      NPU operating frequency in Hz.
+
+  voltage-levels:
+    type: array
+    description: |
+      Supported voltage levels for NPU operation.
+
+  thermal-zone:
+    type: phandle
+    description: |
+      Thermal zone for NPU temperature monitoring.
+
+child-binding:
+  description: Model-specific configuration
+
+  properties:
+    model-name:
+      type: string
+      description: Identifier for the model
+
+    model-size:
+      type: int  
+      description: Size of the model in bytes
+
+    input-tensors:
+      type: int
+      default: 1
+      description: Number of input tensors
+
+    output-tensors:
+      type: int
+      default: 1
+      description: Number of output tensors
+
+    quantization:
+      type: string
+      enum:
+        - "int8"
+        - "int16"
+        - "float32"
+      default: "float32"
+      description: Model quantization type
+
+    acceleration-required:
+      type: boolean
+      description: Whether this model requires hardware acceleration
+
+    memory-footprint:
+      type: int
+      description: Expected memory usage in bytes during inference

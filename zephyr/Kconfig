@@ -1,0 +1,213 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2024 Infineon Technologies AG
+
+config ML_TFLITE_MICRO_INFINEON
+	bool "Infineon TensorFlow Lite Micro library support"
+	select REQUIRES_FULL_LIBC if LIBC_NEWLIB
+	select USE_INFINEON_ABSTRACTION_RTOS
+	help
+	  Enable support for Infineon TensorFlow Lite Micro library for
+	  embedded machine learning inference. Provides optimized inference
+	  engine with optional hardware acceleration support.
+
+if ML_TFLITE_MICRO_INFINEON
+
+config ML_TFLITE_MICRO_PATH
+	string "TensorFlow Lite Micro library path"
+	default "$(ZEPHYR_HAL_INFINEON_MODULE_DIR)/ml-tflite-micro"
+	help
+	  Path to TensorFlow Lite Micro library source.
+
+config ML_TFLITE_MICRO_INCLUDE_PATH
+	string "TensorFlow Lite Micro include path"
+	default "$(ZEPHYR_ML_TFLITE_MICRO_MODULE_DIR)/include"
+	help
+	  Path to TensorFlow Lite Micro include directory.
+
+comment "TensorFlow Lite Micro Core Configuration"
+
+config ML_TFLITE_MICRO_STATIC_MEMORY
+	bool "Use static memory allocation"
+	default y
+	help
+	  Use static pre-allocated memory for TensorFlow Lite Micro operations.
+	  Recommended for embedded systems to ensure deterministic memory usage.
+
+config ML_TFLITE_MICRO_ARENA_SIZE
+	int "TensorFlow Lite Micro arena size (bytes)"
+	range 1024 65536
+	default 8192
+	depends on ML_TFLITE_MICRO_STATIC_MEMORY
+	help
+	  Size of the memory arena for TensorFlow Lite Micro operations.
+	  This memory is used for intermediate tensors during inference.
+
+config ML_TFLITE_MICRO_ENABLE_PROFILING
+	bool "Enable profiling support"
+	default n
+	help
+	  Enable profiling support for TensorFlow Lite Micro operations.
+	  Adds timing information for performance analysis.
+
+config ML_TFLITE_MICRO_ERROR_REPORTER_CUSTOM
+	bool "Use custom error reporter"
+	default y
+	help
+	  Use Zephyr logging infrastructure for TensorFlow Lite Micro error reporting.
+
+comment "Quantization Support"
+
+config ML_TFLITE_MICRO_INT8
+	bool "INT8 quantization support"
+	default y
+	help
+	  Enable INT8 quantized model support for reduced memory usage
+	  and faster inference on supported hardware.
+
+config ML_TFLITE_MICRO_INT16
+	bool "INT16 quantization support"
+	default n
+	help
+	  Enable INT16 quantized model support for enhanced accuracy
+	  while maintaining reduced memory footprint.
+
+config ML_TFLITE_MICRO_FLOAT32
+	bool "Float32 precision support"
+	default y
+	help
+	  Enable full precision float32 model support for maximum accuracy.
+	  May require more memory and processing power.
+
+comment "Operator Support"
+
+config ML_TFLITE_MICRO_ALL_OPS
+	bool "Include all operators"
+	default n
+	help
+	  Include all available TensorFlow Lite Micro operators.
+	  Increases memory usage but supports all model types.
+
+config ML_TFLITE_MICRO_MICRO_OPS_ONLY
+	bool "Include micro ops only"
+	default y
+	depends on !ML_TFLITE_MICRO_ALL_OPS
+	help
+	  Include only most common operators optimized for microcontrollers.
+	  Reduces memory usage while supporting typical embedded ML models.
+
+config ML_TFLITE_MICRO_CONV_OPS
+	bool "Convolution operators"
+	default y
+	help
+	  Include convolution layer operators for CNN models.
+
+config ML_TFLITE_MICRO_FULLY_CONNECTED_OPS
+	bool "Fully connected operators"
+	default y
+	help
+	  Include fully connected layer operators for neural networks.
+
+config ML_TFLITE_MICRO_POOLING_OPS
+	bool "Pooling operators"
+	default y
+	help
+	  Include pooling layer operators for feature reduction.
+
+config ML_TFLITE_MICRO_ACTIVATION_OPS
+	bool "Activation operators"
+	default y
+	help
+	  Include activation function operators (ReLU, Sigmoid, etc.).
+
+comment "Hardware Acceleration"
+
+config ML_TFLITE_MICRO_ETHOS_U55
+	bool "ARM Ethos-U55 NPU support"
+	default n
+	help
+	  Enable ARM Ethos-U55 NPU hardware acceleration for TensorFlow Lite Micro.
+	  Requires compatible hardware and NPU drivers.
+
+config ML_TFLITE_MICRO_NNLITE
+	bool "Infineon NNLite NPU support"
+	default n
+	help
+	  Enable Infineon NNLite NPU hardware acceleration for TensorFlow Lite Micro.
+	  Requires compatible hardware and NPU drivers.
+
+config ML_TFLITE_MICRO_CMSIS_NN
+	bool "ARM CMSIS-NN optimization"
+	default n
+	help
+	  Enable ARM CMSIS-NN optimized kernels for TensorFlow Lite Micro.
+	  Provides performance improvements on ARM Cortex-M processors.
+
+comment "Memory Management"
+
+config ML_TFLITE_MICRO_MEMORY_PLANNER
+	bool "Enable memory planner"
+	default y
+	help
+	  Enable memory planning for optimal tensor memory reuse.
+
+config ML_TFLITE_MICRO_SCRATCH_BUFFERS
+	bool "Use scratch buffers"
+	default y
+	help
+	  Enable scratch buffer support for temporary data during inference.
+
+config ML_TFLITE_MICRO_OPTIMIZE_MEMORY
+	bool "Optimize memory usage"
+	default y
+	help
+	  Enable memory usage optimizations including tensor sharing.
+
+comment "Platform Integration"
+
+config ML_TFLITE_MICRO_AUTO_INIT
+	bool "Automatic initialization"
+	default y
+	help
+	  Automatically initialize TensorFlow Lite Micro during system boot.
+
+config ML_TFLITE_MICRO_INIT_PRIORITY
+	int "Initialization priority"
+	range 1 99
+	default 50
+	depends on ML_TFLITE_MICRO_AUTO_INIT
+	help
+	  Initialization priority for TensorFlow Lite Micro. Lower values
+	  initialize earlier.
+
+comment "Debug and Logging"
+
+config ML_TFLITE_ENABLE_LOGGING
+	bool "Enable TensorFlow Lite Micro logging"
+	default y
+	help
+	  Enable logging for TensorFlow Lite Micro operations.
+	  Useful for debugging inference issues.
+
+comment "Performance Options"
+
+config ML_TFLITE_MICRO_BENCHMARK_MODE
+	bool "Benchmark mode"
+	default n
+	help
+	  Enable benchmark mode for performance measurement and optimization.
+
+config ML_TFLITE_MICRO_DETAILED_PROFILING
+	bool "Detailed profiling"
+	default n
+	depends on ML_TFLITE_MICRO_ENABLE_PROFILING
+	help
+	  Enable detailed per-operation profiling information.
+
+config ML_TFLITE_MICRO_CACHE_OPTIMIZATION
+	bool "Cache optimization"
+	default y
+	depends on ML_TFLITE_MICRO_ETHOS_U55 || ML_TFLITE_MICRO_NNLITE
+	help
+	  Enable cache optimization for NPU operations.
+
+endif # ML_TFLITE_MICRO_INFINEON
