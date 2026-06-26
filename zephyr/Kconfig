@@ -1,0 +1,62 @@
+# TinyUSB stack integration for Zephyr
+#
+# Copyright (c) 2026 Infineon Technologies AG,
+# or an affiliate of Infineon Technologies AG.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Hidden symbol set automatically when this module is present, used so other
+# Kconfig/CMake logic can detect TinyUSB availability.
+config ZEPHYR_TINYUSB_MODULE
+	bool
+
+menuconfig TINYUSB
+	bool "TinyUSB USB stack"
+	help
+	  Build and link the TinyUSB stack. The application must provide a
+	  tusb_config.h on the global include path (see TINYUSB_CONFIG_PATH)
+	  and call tusb_init() / tud_task() / tuh_task() as appropriate.
+
+if TINYUSB
+
+config TINYUSB_CONFIG_PATH
+	string "Directory containing the application tusb_config.h"
+	default ""
+	help
+	  Absolute path of the directory that holds the application provided
+	  tusb_config.h. It is added to the global include path so that the
+	  TinyUSB sources can find it. Leave empty if the application already
+	  exposes the header via zephyr_include_directories().
+
+choice TINYUSB_PORT
+	prompt "USB controller port driver"
+	default TINYUSB_PORT_DWC2_IFX
+	help
+	  Select the device/host controller driver to compile for the target
+	  SoC. This determines CFG_TUSB_MCU and the portable sources added to
+	  the build.
+
+config TINYUSB_PORT_DWC2_IFX
+	bool "Synopsys DWC2 (Infineon PSE84 high-speed)"
+	help
+	  Synopsys DWC2 controller with the Infineon (DWC2_IFX) glue, as used
+	  by the PSOC Edge E84 (PSE84) high-speed USB peripheral.
+
+endchoice
+
+config TINYUSB_CFG_TUSB_MCU
+	string
+	default "OPT_MCU_PSE84" if TINYUSB_PORT_DWC2_IFX
+	help
+	  Value passed to the TinyUSB CFG_TUSB_MCU define. Derived from the
+	  selected controller port; not intended to be set directly.
+
+config TINYUSB_LOG_LEVEL
+	int "TinyUSB debug log level (CFG_TUSB_DEBUG)"
+	range 0 4
+	default 0
+	help
+	  Verbosity of the TinyUSB internal logging. 0 disables logging; higher
+	  values are progressively more verbose. Level 4 disables inlining.
+
+endif # TINYUSB
