@@ -13,11 +13,11 @@ if(CONFIG_ML_TFLITE_MICRO_INFINEON)
   # Core Infineon libraries - using absolute path to Zephyr module location
   zephyr_include_directories(${ZEPHYR_BASE}/modules/hal_infineon/core-lib/include)
 
-  # Infineon abstraction-rtos integration (required dependency)
-  # Use the full asset (modules/hal/infineon/abstraction-rtos) which contains
-  # cyabs_rtos.h. The Zephyr-internal copy (zephyr/modules/hal_infineon/abstraction-rtos)
-  # is stripped and only provides COMPONENT_ZEPHYR implementation headers.
-  zephyr_include_directories(${ZEPHYR_CURRENT_MODULE_DIR}/../abstraction-rtos/include)
+  # Add Zephyr RTOS abstraction source following the official pattern
+  # In the SDK layout, abstraction-rtos is in modules/hal/infineon/.
+  # Get the workspace root and construct absolute paths.
+  get_filename_component(WORKSPACE_ROOT "${ZEPHYR_BASE}" DIRECTORY)
+  zephyr_include_directories(${WORKSPACE_ROOT}/modules/hal/infineon/abstraction-rtos/include)
   zephyr_include_directories(${ZEPHYR_BASE}/modules/hal_infineon/abstraction-rtos/include/COMPONENT_ZEPHYR)
 
   # Add Zephyr RTOS abstraction source following the official pattern
