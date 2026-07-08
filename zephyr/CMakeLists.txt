@@ -27,14 +27,11 @@ if(CONFIG_ML_MIDDLEWARE_INFINEON)
   # is a separate CMake target compiled before the zephyr ARM library sources.
   zephyr_library_compile_options(-include "${CMAKE_CURRENT_SOURCE_DIR}/include/mtb_ml_zephyr_compat.h")
 
-  # 3. Core Infineon libraries - path relative to this module's directory
-  zephyr_include_directories(${ZEPHYR_CURRENT_MODULE_DIR}/../core-lib/include)
+  # 3. Core Infineon libraries - in the SDK layout, core-lib is in modules/hal/infineon/
+  get_filename_component(WORKSPACE_ROOT "${ZEPHYR_BASE}" DIRECTORY)
+  zephyr_include_directories(${WORKSPACE_ROOT}/modules/hal/infineon/core-lib/include)
 
   # 4. Infineon abstraction-rtos integration (required dependency)
-  # Use the full asset (modules/hal/infineon/abstraction-rtos) which contains
-  # cyabs_rtos.h. The Zephyr-internal copy (zephyr/modules/hal_infineon/abstraction-rtos)
-  # is stripped and only provides COMPONENT_ZEPHYR implementation headers.
-  zephyr_include_directories(${ZEPHYR_CURRENT_MODULE_DIR}/../abstraction-rtos/include)
   zephyr_include_directories(${ZEPHYR_BASE}/modules/hal_infineon/abstraction-rtos/include/COMPONENT_ZEPHYR)
 
   # Add Zephyr RTOS abstraction source following the official pattern
@@ -54,8 +51,12 @@ if(CONFIG_ML_MIDDLEWARE_INFINEON)
   # NNLite NPU support: compile PDL kernel + nnkernel ops against the
   # COMPONENT_NNLITE2 precompiled libtensorflow-microlite.a
   if(CONFIG_ML_MIDDLEWARE_NNLITE)
-    set(NNKERNEL_DIR ${ZEPHYR_CURRENT_MODULE_DIR}/../mtb-dsl-pse8xxgp/nnkernel/COMPONENT_CM33)
-    set(DSL_PDL_DRV_DIR ${ZEPHYR_CURRENT_MODULE_DIR}/../mtb-dsl-pse8xxgp/pdl/drivers)
+    # In the SDK layout (modules/lib/ml-middleware), mtb-dsl-pse8xxgp is in
+    # modules/hal/infineon/. Get the workspace root (parent of ZEPHYR_BASE)
+    # and construct absolute paths.
+    get_filename_component(WORKSPACE_ROOT "${ZEPHYR_BASE}" DIRECTORY)
+    set(NNKERNEL_DIR ${WORKSPACE_ROOT}/modules/hal/infineon/mtb-dsl-pse8xxgp/nnkernel/COMPONENT_CM33)
+    set(DSL_PDL_DRV_DIR ${WORKSPACE_ROOT}/modules/hal/infineon/mtb-dsl-pse8xxgp/pdl/drivers)
 
     zephyr_include_directories(${NNKERNEL_DIR}/include)
 
