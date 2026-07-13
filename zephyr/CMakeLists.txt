@@ -60,5 +60,10 @@ if(CONFIG_TINYUSB)
       ${TUSB_DIR}/src/portable/synopsys/dwc2/hcd_dwc2.c
       ${TUSB_DIR}/src/portable/synopsys/dwc2/dwc2_common.c
     )
+
+    # Zephyr-native controller integration: connects the USBHS IRQ
+    if(CONFIG_TINYUSB_DWC2_IFX_IRQ_CONNECT)
+      zephyr_library_sources(${CMAKE_CURRENT_LIST_DIR}/src/tinyusb_dwc2_ifx.c)
+    endif()
   endif()
 endif()

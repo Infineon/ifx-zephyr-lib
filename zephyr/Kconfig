@@ -44,6 +44,33 @@ config TINYUSB_PORT_DWC2_IFX
 
 endchoice
 
+if TINYUSB_PORT_DWC2_IFX
+
+config TINYUSB_DWC2_IFX_IRQ_CONNECT
+	bool "Connect the USBHS controller IRQ from devicetree"
+	default n
+	help
+	  Connect the on-chip USBHS (DWC2) controller interrupt to TinyUSB's
+	  tusb_int_handler() at boot, using the interrupt of the devicetree
+	  node labelled 'usbhs'. This lets an application drive the TinyUSB
+	  stack without a hw/bsp board layer wiring the IRQ.
+
+	  Mutually exclusive with a TinyUSB hw/bsp board layer that also
+	  connects the interrupt.
+	  Leave disabled for samples that still use the hw/bsp board layer;
+	  enable it for BSP-free samples that call tusb_init() directly.
+
+config TINYUSB_DWC2_IFX_INIT_PRIORITY
+	int "TinyUSB DWC2 IFX init priority"
+	default 90
+	depends on TINYUSB_DWC2_IFX_IRQ_CONNECT
+	help
+	  SYS_INIT priority in the POST_KERNEL level at which the USBHS
+	  interrupt is connected and enabled. Must run before the application
+	  calls tusb_init().
+
+endif # TINYUSB_PORT_DWC2_IFX
+
 config TINYUSB_CFG_TUSB_MCU
 	string
 	default "OPT_MCU_PSE84" if TINYUSB_PORT_DWC2_IFX
